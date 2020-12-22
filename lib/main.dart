@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:spkkontrasepsi/Onboarding.dart';
 import 'Animasi/FadeAnimation.dart';
 
 void main() =>
@@ -20,6 +22,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Animation<double> _widthAnimation;
   Animation<double> _positionAnimation;
 
+  bool hideIcon = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -27,20 +31,58 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     _scaleController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+
     _scaleAnimation =
         Tween<double>(begin: 1.0, end: 0.8).animate(_scaleController)
           ..addStatusListener((status) {
-            if (status == AnimationStatus.completed) {}
+            if (status == AnimationStatus.completed) {
+              _widthController.forward();
+            }
           });
 
     _widthController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 600));
+
     _widthAnimation =
-        Tween<double>(begin: 80.0, end: 250.0).animate(_widthController);
+        Tween<double>(begin: 80.0, end: 300.0).animate(_widthController)
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              _positionController.forward();
+            }
+          });
+
+    _positionController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
+
+    _positionAnimation =
+        Tween<double>(begin: 0.0, end: 215.0).animate(_positionController)
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              setState(() {
+                hideIcon = true;
+              });
+              _scale2Controller.forward();
+            }
+          });
+
+    _scale2Controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+
+    _scale2Animation =
+        Tween<double>(begin: 1.0, end: 32.0).animate(_scale2Controller)
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.fade, child: OnBoarding()));
+            }
+          });
   }
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Color.fromRGBO(145, 242, 242, 1),
       body: Container(
@@ -48,12 +90,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         child: Stack(
           children: <Widget>[
             Positioned(
-              top: -75,
-              left: -30,
+              top: -70,
+              left: 0,
               child: FadeAnimation(
                   1,
                   Container(
-                    width: 466,
+                    width: width,
                     height: 400,
                     decoration: BoxDecoration(
                         image: DecorationImage(
@@ -62,12 +104,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   )),
             ),
             Positioned(
-              top: -125,
-              left: -30,
+              top: -110,
+              left: 0,
               child: FadeAnimation(
-                  1.4,
+                  1.3,
                   Container(
-                    width: 466,
+                    width: width,
                     height: 400,
                     decoration: BoxDecoration(
                         image: DecorationImage(
@@ -76,12 +118,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   )),
             ),
             Positioned(
-              top: -175,
-              left: -30,
+              top: -150,
+              left: 0,
               child: FadeAnimation(
-                  1.7,
+                  1.6,
                   Container(
-                    width: 466,
+                    width: width,
                     height: 400,
                     decoration: BoxDecoration(
                         image: DecorationImage(
@@ -100,7 +142,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       Text(
                         "Selamat Datang",
                         style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                             fontSize: 40,
                             fontWeight: FontWeight.bold),
                       )),
@@ -110,9 +152,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   FadeAnimation(
                       1.3,
                       Text(
-                        "Aplikasi Pendukung Keputusan Alat Kontrasepsi Berbasis Mobile",
+                        "Sistem Pendukung Keputusan\nAlat Kontrasepsi.",
                         style: TextStyle(
-                            color: Colors.black.withOpacity(.7), height: 1.4),
+                            color: Colors.black.withOpacity(.7),
+                            height: 1.4,
+                            fontSize: 20),
                       )),
                   SizedBox(
                     height: 180,
@@ -124,27 +168,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         builder: (context, child) => Transform.scale(
                             scale: _scaleAnimation.value,
                             child: Center(
-                              child: Container(
-                                width: 80,
-                                height: 80,
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50),
-                                    color: Colors.blue.withOpacity(.4)),
-                                child: InkWell(
-                                  onTap: () {
-                                    _scaleController.forward();
-                                  },
-                                  child: Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.blue),
-                                    child: Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.white,
-                                    ),
+                              child: AnimatedBuilder(
+                                animation: _widthController,
+                                builder: (context, child) => Container(
+                                  width: _widthAnimation.value,
+                                  height: 80,
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: Colors.blue.withOpacity(.4)),
+                                  child: InkWell(
+                                    onTap: () {
+                                      _scaleController.forward();
+                                    },
+                                    child: Stack(children: <Widget>[
+                                      AnimatedBuilder(
+                                        animation: _positionController,
+                                        builder: (context, child) => Positioned(
+                                          left: _positionAnimation.value,
+                                          child: AnimatedBuilder(
+                                            animation: _scale2Controller,
+                                            builder: (context, child) =>
+                                                Transform.scale(
+                                                    scale:
+                                                        _scale2Animation.value,
+                                                    child: Container(
+                                                      width: 60,
+                                                      height: 60,
+                                                      decoration: BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          color: Colors.blue),
+                                                      child: hideIcon == false
+                                                          ? Icon(
+                                                              Icons
+                                                                  .arrow_forward,
+                                                              color:
+                                                                  Colors.white,
+                                                            )
+                                                          : Container(),
+                                                    )),
+                                          ),
+                                        ),
+                                      ),
+                                    ]),
                                   ),
                                 ),
                               ),
